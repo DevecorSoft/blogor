@@ -1,3 +1,9 @@
-from django.shortcuts import render
+from django.http import HttpResponse
+import json
+import glob
+import os
+from .viewModels.blog import list_blog
 
-# Create your views here.
+
+def blog_list(request):
+    return HttpResponse(json.dumps(list_blog()))

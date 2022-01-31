@@ -1,14 +1,9 @@
-import json
 import os
+from unittest import TestCase
+from . import blog
 
-from django.test import TestCase
-from django.test import Client
 
-
-class GetBlogListApiTest(TestCase):
-
-    client = Client()
-
+class Test(TestCase):
     def setUp(self) -> None:
         super().setUp()
         os.environ['blog_home'] = '.'
@@ -20,11 +15,8 @@ class GetBlogListApiTest(TestCase):
         os.system("rm test1.md")
         os.system("rm test2.md")
 
-    def test_then_should_return_200(self):
-        response = self.client.get("/blog/list/")
-        self.assertEqual(response.status_code, 200)
-        body = json.loads(response.content)
-        self.assertIsInstance(body, list)
+    def test_list_blog(self):
+        blog_list = blog.list_blog()
         self.assertListEqual(
             [
                 {
@@ -36,5 +28,19 @@ class GetBlogListApiTest(TestCase):
                     'summary': ['# test 1\n', '\n', 'a line of summary\n']
                 },
             ],
-            body
+            blog_list
+        )
+
+    def test_should_return_relative_path_of_blogs(self):
+        blogs = blog.locate_blog()
+        self.assertListEqual(blogs, ['./test2.md', './test1.md'])
+
+    def test_should_return_summary_of_a_blog(self):
+        summary = blog.get_blog_summary('./test1.md')
+        self.assertDictEqual(
+            {
+                'id': 'test1.md',
+                'summary': ['# test 1\n', '\n', 'a line of summary\n']
+            },
+            summary
         )
