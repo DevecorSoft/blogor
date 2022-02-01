@@ -3,7 +3,7 @@ from unittest import TestCase
 from . import blog
 
 
-class Test(TestCase):
+class TestBlog(TestCase):
     def setUp(self) -> None:
         super().setUp()
         os.environ['blog_home'] = '.'
@@ -44,3 +44,11 @@ class Test(TestCase):
             },
             summary
         )
+
+    def test_should_return_content_of_a_blog(self):
+        content = blog.get_blog_content('test1.md')
+        self.assertEqual(content, '# test 1\n\na line of summary\n')
+
+    def test_should_return_None_when_blog_is_not_existed(self):
+        content = blog.get_blog_content('test.md')
+        self.assertIsNone(content)
