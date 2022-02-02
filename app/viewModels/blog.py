@@ -49,9 +49,10 @@ def get_blog_summary(path) -> List:
     return summary
 
 
-def get_blog_content(blog_id) -> str:
+def get_blog_content(blog_id, lang='en') -> str:
     blog_home = os.getenv('blog_home')
-    blog_file_path = f'{blog_home}/{blog_id}'
+    blog_file_name = blog_id + SupportedLang().map_from(lang)
+    blog_file_path = f'{blog_home}/{blog_file_name}'
     if os.path.exists(blog_file_path):
         with open(blog_file_path, 'r') as f:
             return f.read()

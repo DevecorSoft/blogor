@@ -76,18 +76,46 @@ class GetBlogApiTest(TestCase):
         os.system("mkdir test")
         os.system("echo '# test 1\n\na line of summary' > test/test1.md")
         os.system("echo '# test 2\n\na line of summary 2' > test/test2.md")
+        os.system("echo '# test 3\n\na line of summary 3' > test/test3.md")
+        os.system("echo '# 测试 1\n\n一行简介' > test/test1_zh.md")
+        os.system("echo '# 测试 2\n\n一行摘要' > test/test2_zh.md")
 
     def tearDown(self) -> None:
         super().tearDown()
         os.system("rm -rf test")
 
-    def test_should_return_text_file_with_200(self):
-        response = self.client.get('/blog/blog-test2.md/')
-        blog = response.content
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(b'# test 2\n\na line of summary 2\n', blog)
+    def test_cases_of_200(self):
+        def should_return_blog_content_when_it_exists():
+            response = self.client.get('/blog/blog-test2/')
+            blog = response.content
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(b'# test 2\n\na line of summary 2\n', blog)
+        should_return_blog_content_when_it_exists()
 
-    def test_should_return_400_when_blog_is_not_existed(self):
-        response = self.client.get('/blog/blog-test.md/')
-        self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.content, b'')
+        def should_return_blog_content_in_en():
+            response = self.client.get('/blog/blog-test2/')
+            blog = response.content
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(b'# test 2\n\na line of summary 2\n', blog)
+        should_return_blog_content_in_en()
+
+        def should_return_blog_content_in_zh():
+            response = self.client.get('/blog/blog-test2/?lang=zh')
+            blog = response.content
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(bytes('# 测试 2\n\n一行摘要\n', 'utf8'), blog)
+        should_return_blog_content_in_zh()
+
+    def test_cases_of_404(self):
+        def should_return_404_when_corresponding_zh_blog_is_not_existed():
+            response = self.client.get('/blog/blog-test3/?lang=zh')
+            blog = response.content
+            self.assertEqual(response.status_code, 404)
+            self.assertEqual(blog, b'')
+        should_return_404_when_corresponding_zh_blog_is_not_existed()
+
+        def test_should_return_404_when_blog_is_not_existed():
+            response = self.client.get('/blog/blog-test/')
+            self.assertEqual(response.status_code, 404)
+            self.assertEqual(response.content, b'')
+        test_should_return_404_when_blog_is_not_existed()

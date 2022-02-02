@@ -1,4 +1,4 @@
-from django.http import HttpResponse, HttpResponseBadRequest
+from django.http import HttpResponse, HttpResponseNotFound
 import json
 from .viewModels.blog import list_blog, get_blog_content
 from django.views.decorators.http import require_GET
@@ -12,7 +12,8 @@ def blog_list(request):
 
 @require_GET
 def blog(request, blogId):
-    content = get_blog_content(blogId)
+    lang = request.GET.get('lang', 'en')
+    content = get_blog_content(blogId, lang)
     if content:
         return HttpResponse(content)
-    return HttpResponseBadRequest()
+    return HttpResponseNotFound()

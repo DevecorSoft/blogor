@@ -44,11 +44,11 @@ class TestBlog(TestCase):
 
     def test_get_blog_content(self):
         def should_return_the_content_of_blog_when_it_exists():
-            content = blog.get_blog_content('test1.md')
+            content = blog.get_blog_content('test1')
             self.assertEqual(content, '# test 1\n\na line of summary\n')
 
         def should_return_none_when_blog_is_not_existed():
-            content = blog.get_blog_content('test.md')
+            content = blog.get_blog_content('test')
             self.assertIsNone(content)
 
         should_return_none_when_blog_is_not_existed()
