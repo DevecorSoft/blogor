@@ -7,7 +7,8 @@ from django.views.decorators.http import require_GET
 
 @require_GET
 def blog_list(request):
-    return HttpResponse(json.dumps(list_blog()))
+    lang = request.GET.get('lang', 'en')
+    return HttpResponse(json.dumps(list_blog(lang)))
 
 
 @require_GET
