@@ -1,6 +1,5 @@
 from django.http import HttpResponse, HttpResponseBadRequest
 import json
-import os
 from .viewModels.blog import list_blog, get_blog_content
 from django.views.decorators.http import require_GET
 
