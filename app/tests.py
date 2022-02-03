@@ -26,8 +26,10 @@ class GetBlogListApiTest(TestCase):
         response = self.client.get("/blog/list/")
         self.assertEqual(response.status_code, 200)
         body = json.loads(response.content)
+        body.sort(key=lambda e: e['id'], reverse=True)
         self.assertIsInstance(body, list)
         self.assertListEqual(
+            body,
             [
                 {
                     'id': 'test3',
@@ -41,13 +43,13 @@ class GetBlogListApiTest(TestCase):
                     'id': 'test1',
                     'summary': ['# test 1\n', '\n', 'a line of summary\n']
                 },
-            ],
-            body
+            ]
         )
 
     def test_should_return_blog_list_in_zh_cn(self):
         response = self.client.get('/blog/list/?lang=zh')
         body = json.loads(response.content)
+        body.sort(key=lambda e: e['id'], reverse=True)
         self.assertListEqual(
             body,
             [
@@ -90,6 +92,7 @@ class GetBlogApiTest(TestCase):
             blog = response.content
             self.assertEqual(response.status_code, 200)
             self.assertEqual(b'# test 2\n\na line of summary 2\n', blog)
+
         should_return_blog_content_when_it_exists()
 
         def should_return_blog_content_in_en():
@@ -97,6 +100,7 @@ class GetBlogApiTest(TestCase):
             blog = response.content
             self.assertEqual(response.status_code, 200)
             self.assertEqual(b'# test 2\n\na line of summary 2\n', blog)
+
         should_return_blog_content_in_en()
 
         def should_return_blog_content_in_zh():
@@ -104,6 +108,7 @@ class GetBlogApiTest(TestCase):
             blog = response.content
             self.assertEqual(response.status_code, 200)
             self.assertEqual(bytes('# 测试 2\n\n一行摘要\n', 'utf8'), blog)
+
         should_return_blog_content_in_zh()
 
     def test_cases_of_404(self):
@@ -112,10 +117,12 @@ class GetBlogApiTest(TestCase):
             blog = response.content
             self.assertEqual(response.status_code, 404)
             self.assertEqual(blog, b'')
+
         should_return_404_when_corresponding_zh_blog_is_not_existed()
 
         def test_should_return_404_when_blog_is_not_existed():
             response = self.client.get('/blog/blog-test/')
             self.assertEqual(response.status_code, 404)
             self.assertEqual(response.content, b'')
+
         test_should_return_404_when_blog_is_not_existed()
