@@ -1,11 +1,11 @@
-version: '3.9'
 services:
   blogor:
     build: .
+    environment:
+      blog_host: /root/blog
     image: devecorsoft/blogor:0.0.2
     ports:
-      - '8000:8000'
+    - 8000:8000
     volumes:
-      - ~/mirrors/cn/devecor/blog:/root/blog
-    environment:
-      blog_host: '/root/blog'
+    - ~/mirrors/cn/devecor/blog:/root/blog
+version: '3.9'

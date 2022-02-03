@@ -1,0 +1,109 @@
+name: build
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.9'
+          cache: 'pip'
+      - run: pip install -r requirements.txt
+
+      - run: python manage.py test
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.9'
+          cache: 'pip'
+
+      - name: Read current version
+        id: read_current_version
+        run: echo "::set-output name=version::$(cat version.txt)"
+
+      - name: Read docker image version
+        id: read_docker_image_version
+        run: |
+          python -m pip install pyyaml
+          echo "::set-output name=version::$(python .github/scripts/read-version-yaml.py docker-compose.yml)"
+
+      - name: Verifiy version
+        if: ${{ steps.read_current_version.outputs.version == steps.read_docker_image_version.outputs.version }}
+        run: exit 1
+
+      - name: Login github packages
+        run: docker login ghcr.io -u devecor -p ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build docker image
+        run: docker build -t ghcr.io/devecorsoft/blogor:${{ steps.read_current_version.outputs.version }} -t ghcr.io/devecorsoft/blogor:latest .
+
+      - name: Publish
+        run: |
+          docker push ghcr.io/devecorsoft/blogor:latest
+          docker push ghcr.io/devecorsoft/blogor:${{ steps.read_current_version.outputs.version }}
+          docker logout ghcr.io
+
+      - name: Bump up version
+        run: |
+          python .github/scripts/bump-version-yaml.py docker-compose.yml  ${{ steps.read_current_version.outputs.version }}
+          git add docker-compose.yml
+          git config user.name "awesome"
+          git config user.email "awesome@github.com"
+          git commit -m "Bump version ${{ steps.read_current_version.outputs.version }}"
+          git push
+
+  release:
+    needs: publish
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          ref: 'main'
+
+      - name: Install ssh-key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          eval "$(ssh-agent -s)"
+          ssh-add ~/.ssh/id_ed25519
+          ssh-keyscan "devecor.cn" >> ~/.ssh/known_hosts
+
+      - name: Update docker-compose file
+        run: |
+          cp docker-compose.yml docker-compose@next.yml
+          rsync -v docker-compose@next.yml root@devecor.cn:~/blogor
+
+      - name: Service up
+        run: |
+          ssh root@devecor.cn "
+            cd blogor;
+            docker login ghcr.io -u devecor -p ${{ secrets.GITHUB_TOKEN }};
+            docker compose down;
+            mv docker-compose@next.yml docker-compose.yml;
+            docker compose up -d;
+            docker logout ghcr.io;
+          "
+
+      - name: Delete ssh-key
+        run: rm ~/.ssh/id_ed25519
