@@ -3,7 +3,7 @@ services:
     build: .
     environment:
       blog_host: /root/blog
-    image: devecorsoft/blogor:0.0.3
+    image: devecorsoft/blogor:0.0.4
     ports:
     - 8000:8000
     volumes:
