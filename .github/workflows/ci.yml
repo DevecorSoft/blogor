@@ -92,7 +92,7 @@ jobs:
       - name: Update docker-compose file
         run: |
           cp docker-compose.yml docker-compose@next.yml
-          rsync -v docker-compose@next.yml root@devecor.cn:~/blogor
+          rsync -v docker-compose@next.yml root@devecor.cn:~/blogor/
 
       - name: Service up
         run: |

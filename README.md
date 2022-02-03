@@ -1,4 +1,5 @@
 # Blogor
+[![build](https://github.com/DevecorSoft/blogor/actions/workflows/ci.yml/badge.svg)](https://github.com/DevecorSoft/blogor/actions/workflows/ci.yml)
 
 a tiny markdown blog file manager
 
