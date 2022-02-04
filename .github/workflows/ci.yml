@@ -72,7 +72,7 @@ jobs:
 
   release:
     needs: publish
-    runs-on: self-hosted
+    runs-on: [self-hosted, remote]
 
     steps:
       - name: Checkout
