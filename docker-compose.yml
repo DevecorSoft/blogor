@@ -1,6 +1,5 @@
 services:
   blogor:
-    build: .
     environment:
       blog_host: /root/blog
     image: devecorsoft/blogor:0.0.6
