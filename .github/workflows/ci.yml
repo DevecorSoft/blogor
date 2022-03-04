@@ -130,7 +130,7 @@ jobs:
 
       - name: Service up
         run: |
-          ssh root@devecor.cn '
+          ssh root@8.142.164.194 '
             docker rmi ghcr.io/devecorsoft/blogor:latest;
             docker run -d -e "blog_home=/root/blog" -v "~/mirrors/cn/devecor/blog:/root/blog" ghcr.io/devecorsoft/blogor:latest;
           '
