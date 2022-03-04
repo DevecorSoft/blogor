@@ -126,13 +126,15 @@ jobs:
           chmod 600 ~/.ssh/id_ed25519
           eval "$(ssh-agent -s)"
           ssh-add ~/.ssh/id_ed25519
-          ssh-keyscan "8.142.164.194" >> ~/.ssh/known_hosts
+          ssh-keyscan -H "8.142.164.194" >> ~/.ssh/known_hosts
 
       - name: Service up
         run: |
           ssh root@8.142.164.194 '
+            docker stop blogor;
+            docker rm blogor;
             docker rmi ghcr.io/devecorsoft/blogor:latest;
-            docker run -d -e "blog_home=/root/blog" -v "/root/mirrors/cn/devecor/blog:/root/blog" ghcr.io/devecorsoft/blogor:latest;
+            docker run -d -e "blog_home=/root/blog" -p 80:8000 -v "/root/mirrors/cn/devecor/blog:/root/blog" --name blogor ghcr.io/devecorsoft/blogor:latest;
           '
 
       - name: Delete ssh-key
