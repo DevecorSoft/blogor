@@ -2,7 +2,7 @@ services:
   blogor:
     environment:
       blog_home: /root/blog
-    image: ghcr.io/devecorsoft/blogor:0.0.14
+    image: ghcr.io/devecorsoft/blogor:0.0.15
     ports:
     - 8000:8000
     volumes:
