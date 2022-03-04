@@ -1,0 +1,35 @@
+name: release to ecs
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  release:
+    needs: publish
+    runs-on: [self-hosted, remote]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          ref: 'main'
+
+      - name: Install ssh-key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          eval "$(ssh-agent -s)"
+          ssh-add ~/.ssh/id_ed25519
+          ssh-keyscan "devecor.cn" >> ~/.ssh/known_hosts
+
+      - name: Service up
+        run: |
+          ssh root@devecor.cn '
+            docker rmi ghcr.io/devecorsoft/blogor:latest;
+            docker run -d -e "blog_home=/root/blog" -v "~/mirrors/cn/devecor/blog:/root/blog" ghcr.io/devecorsoft/blogor:latest;
+          '
+
+      - name: Delete ssh-key
+        run: rm ~/.ssh/id_ed25519
