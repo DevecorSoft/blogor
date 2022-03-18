@@ -162,7 +162,7 @@ jobs:
 
       - name: Service up
         run: |
-          ssh root@13.250.107.114 '
+          ssh ubuntu@13.250.107.114 '
             docker stop blogor;
             docker rm blogor;
             docker rmi ghcr.io/devecorsoft/blogor:latest;
