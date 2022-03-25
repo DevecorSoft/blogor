@@ -40,7 +40,7 @@ jobs:
         run: echo "::set-output name=version::$(cat version.txt)"
 
       - name: Verifiy version
-        if: $(git tag -l ${{ steps.read_current_version.outputs.version }}) != ''
+        if: $(git tag -l ${{ steps.read_current_version.outputs.version }}) != ""
         run: |
           echo "please bump up version first!"
           exit 1
