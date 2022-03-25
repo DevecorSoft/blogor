@@ -39,8 +39,12 @@ jobs:
         id: read_current_version
         run: echo "::set-output name=version::$(cat version.txt)"
 
+      - name: Read tag from github
+        id: read_tag_from_github
+        run: echo "::set-output name=tag::$(git tag -l ${{ steps.read_current_version.outputs.version }})"
+
       - name: Verifiy version
-        if: $(git tag -l ${{ steps.read_current_version.outputs.version }}) != ""
+        if: ${{ steps.read_tag_from_github.outputs.tag != "" }}
         run: |
           echo "please bump up version first!"
           exit 1
