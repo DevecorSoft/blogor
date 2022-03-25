@@ -61,18 +61,8 @@ jobs:
           docker push ghcr.io/devecorsoft/blogor:${{ steps.read_current_version.outputs.version }}
           docker logout ghcr.io
 
-      - name: Bump up version
-        run: |
-          python .github/scripts/bump-version-yaml.py docker-compose.yml  ${{ steps.read_current_version.outputs.version }}
-          git add docker-compose.yml
-          git config user.name "awesome"
-          git config user.email "awesome@github.com"
-          git commit -m "Bump version ${{ steps.read_current_version.outputs.version }}"
-          git push
-
-  release:
+  release-to-staging:
     needs: publish
-    if: 'false'
     runs-on: [self-hosted, remote]
 
     steps:
@@ -90,83 +80,13 @@ jobs:
           ssh-add ~/.ssh/id_ed25519
           ssh-keyscan "devecor.cn" >> ~/.ssh/known_hosts
 
-      - name: Update docker-compose file
-        run: |
-          cp docker-compose.yml docker-compose@next.yml
-          rsync -v docker-compose@next.yml root@devecor.cn:~/blogor/
-
       - name: Service up
         run: |
-          ssh root@devecor.cn "
-            cd blogor;
-            docker login ghcr.io -u devecor -p ${{ secrets.GITHUB_TOKEN }};
-            docker compose down;
-            mv docker-compose@next.yml docker-compose.yml;
-            docker compose up -d;
-            docker logout ghcr.io;
-          "
-
-      - name: Delete ssh-key
-        run: rm ~/.ssh/id_ed25519
-
-  release-to-ecs:
-    needs: publish
-    if: 'false'
-    runs-on: [ self-hosted, remote ]
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-        with:
-          ref: 'main'
-
-      - name: Install ssh-key
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_ed25519
-          chmod 600 ~/.ssh/id_ed25519
-          eval "$(ssh-agent -s)"
-          ssh-add ~/.ssh/id_ed25519
-          ssh-keyscan -H "8.142.164.194" >> ~/.ssh/known_hosts
-
-      - name: Service up
-        run: |
-          ssh root@8.142.164.194 '
+          ssh root@dev.devecor.cn '
             docker stop blogor;
             docker rm blogor;
             docker rmi ghcr.io/devecorsoft/blogor:latest;
-            docker run -d -e "blog_home=/root/blog" -p 80:8000 -v "/root/mirrors/cn/devecor/blog:/root/blog" --name blogor ghcr.io/devecorsoft/blogor:latest;
-          '
-
-      - name: Delete ssh-key
-        run: rm ~/.ssh/id_ed25519
-
-  release-to-ec2:
-    needs: publish
-    runs-on: [ self-hosted, remote ]
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-        with:
-          ref: 'main'
-
-      - name: Install ssh-key
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_ed25519
-          chmod 600 ~/.ssh/id_ed25519
-          eval "$(ssh-agent -s)"
-          ssh-add ~/.ssh/id_ed25519
-          ssh-keyscan -H "13.250.107.114" >> ~/.ssh/known_hosts
-
-      - name: Service up
-        run: |
-          ssh ubuntu@13.250.107.114 '
-            docker stop blogor;
-            docker rm blogor;
-            docker rmi ghcr.io/devecorsoft/blogor:latest;
-            docker run -d -e "blog_home=/root/blog" -p 80:8000 -v "/root/mirrors/cn/devecor/blog:/root/blog" --name blogor ghcr.io/devecorsoft/blogor:latest;
+            docker run -d -e "blog_home=/root/blog" -p 8000:8000 -v "/root/mirrors/cn/devecor/blog:/root/blog" --name blogor ghcr.io/devecorsoft/blogor:latest;
           '
 
       - name: Delete ssh-key
