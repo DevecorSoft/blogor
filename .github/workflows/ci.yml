@@ -68,7 +68,6 @@ jobs:
 
   release-to-staging:
     needs: publish
-    if: 'false'
     runs-on: [self-hosted, remote]
 
     steps:
