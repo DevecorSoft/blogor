@@ -58,6 +58,7 @@ jobs:
           docker tag devecorsoft/blogor:latest ghcr.io/devecorsoft/blogor:latest
           docker tag devecorsoft/blogor:latest ghcr.io/devecorsoft/blogor:${{ steps.read_current_version.outputs.version }}
           docker push ghcr.io/devecorsoft/blogor:${{ steps.read_current_version.outputs.version }}
+          docker push ghcr.io/devecorsoft/blogor:latest
           docker logout ghcr.io
 
       - name: Publish to aliyun
@@ -66,6 +67,7 @@ jobs:
           docker tag devecorsoft/blogor:latest registry.cn-zhangjiakou.aliyuncs.com/devecorsoft/blogor:latest
           docker tag devecorsoft/blogor:latest registry.cn-zhangjiakou.aliyuncs.com/devecorsoft/blogor:${{ steps.read_current_version.outputs.version }}
           docker push registry.cn-zhangjiakou.aliyuncs.com/devecorsoft/blogor:${{ steps.read_current_version.outputs.version }}
+          docker push registry.cn-zhangjiakou.aliyuncs.com/devecorsoft/blogor:latest
           docker logout registry.cn-zhangjiakou.aliyuncs.com
 
       - name: Git tagging
