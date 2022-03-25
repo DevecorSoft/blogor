@@ -61,6 +61,11 @@ jobs:
           docker push ghcr.io/devecorsoft/blogor:${{ steps.read_current_version.outputs.version }}
           docker logout ghcr.io
 
+      - name: Tagging
+        run: |
+          git tag $(cat version.txt)
+          git push origin --tags
+
   release-to-staging:
     needs: publish
     if: 'false'
