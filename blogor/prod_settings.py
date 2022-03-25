@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-w0)#@ka^%-sq%=q_8ug7=8!z80l^1y1(_unk8fo1h%cq1@)jy*
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['devecor.cn', 'blogor', '8.142.164.194', '8.142.92.162', '*']
+ALLOWED_HOSTS = ['devecor.cn', 'blogor', 'dev.devecor.cn']
 
 # Application definition
 
