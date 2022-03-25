@@ -49,19 +49,26 @@ jobs:
           echo "please bump up version first!"
           exit 1
 
-      - name: Login github packages
-        run: docker login ghcr.io -u devecor -p ${{ secrets.GITHUB_TOKEN }}
-
       - name: Build docker image
-        run: docker build -t ghcr.io/devecorsoft/blogor:${{ steps.read_current_version.outputs.version }} -t ghcr.io/devecorsoft/blogor:latest .
+        run: docker build -t devecorsoft/blogor:${{ steps.read_current_version.outputs.version }} -t devecorsoft/blogor:latest .
 
-      - name: Publish
+      - name: Publish to github
         run: |
-          docker push ghcr.io/devecorsoft/blogor:latest
+          docker login ghcr.io -u devecor -p ${{ secrets.GITHUB_TOKEN }}
+          docker tag devecorsoft/blogor:latest ghcr.io/devecorsoft/blogor:latest
+          docker tag devecorsoft/blogor:latest ghcr.io/devecorsoft/blogor:${{ steps.read_current_version.outputs.version }}
           docker push ghcr.io/devecorsoft/blogor:${{ steps.read_current_version.outputs.version }}
           docker logout ghcr.io
 
-      - name: Tagging
+      - name: Publish to aliyun
+        run: |
+          docker login registry.cn-zhangjiakou.aliyuncs.com -u ${{ secrets.ALIYUN_CR_USER_NAME }} -p ${{ secrets.ALIYUN_CR_USER_PASS }}
+          docker tag devecorsoft/blogor:latest registry.cn-zhangjiakou.aliyuncs.com/devecorsoft/blogor:latest
+          docker tag devecorsoft/blogor:latest registry.cn-zhangjiakou.aliyuncs.com/devecorsoft/blogor:${{ steps.read_current_version.outputs.version }}
+          docker push registry.cn-zhangjiakou.aliyuncs.com/devecorsoft/blogor:${{ steps.read_current_version.outputs.version }}
+          docker logout registry.cn-zhangjiakou.aliyuncs.com
+
+      - name: Git tagging
         run: |
           git tag $(cat version.txt)
           git push origin --tags
@@ -90,8 +97,8 @@ jobs:
           ssh root@dev.devecor.cn '
             docker stop blogor;
             docker rm blogor;
-            docker rmi ghcr.io/devecorsoft/blogor:latest;
-            docker run -d -e "blog_home=/root/blog" -p 8000:8000 -v "/root/mirrors/cn/devecor/blog:/root/blog" --name blogor ghcr.io/devecorsoft/blogor:latest;
+            docker rmi registry.cn-zhangjiakou.aliyuncs.com/devecorsoft/blogor:latest;
+            docker run -d -e "blog_home=/root/blog" -p 8000:8000 -v "/root/mirrors/cn/devecor/blog:/root/blog" --name blogor registry.cn-zhangjiakou.aliyuncs.com/devecorsoft/blogor:latest;
           '
 
       - name: Delete ssh-key
