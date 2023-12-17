@@ -77,7 +77,7 @@ jobs:
 
   release-to-staging:
     needs: publish
-    runs-on: [self-hosted, remote]
+    runs-on: 'ubuntu-latest'
 
     steps:
       - name: Checkout
